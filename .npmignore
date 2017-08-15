@@ -1,0 +1,13 @@
+.sass-cache
+_build
+build
+.editorconfig
+.versions
+.babelrc
+yarn.lock
+package-lock.json
+.eslintrc.json
+.idea_modules/
+.idea/
+!template/.babelrc
+!template/.eslintrc.json
