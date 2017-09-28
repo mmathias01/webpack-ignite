@@ -30,7 +30,6 @@ let basicConfig = {
  * Advanced Config - only edit if you know exactly what you are doing!
  */
 let advancedConfig = {
-    publicUrl: '/',
     publicPath: '/',
     cssRelativePath: '../',
     fileLoaderRelativePath: '../',
@@ -54,10 +53,8 @@ let advancedConfig = {
     externals:{},
     cssPreProcessingExcludes: [],
     postCssOptions: {
-        data: '@import "global";',
         includePaths: [
-            path.join(__appDir, '..', 'src/assets/scss/'),
-            path.join(__appDir, '..', 'node_modules/foundation-sites/scss')
+            path.join(__appDir, '..', 'src/assets/scss/')
         ]
     },
     additionalCopyOperations: [],
@@ -103,7 +100,7 @@ const fileTypes = {
 const getConfig = () => {
 
     return new Promise((resolve, reject) => {
-        portfinder.basePort = 3001;
+        portfinder.basePort = 3000;
         portfinder.getPortPromise()
             .then((port) => {
                 devServerConfig.port = port;

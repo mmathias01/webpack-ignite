@@ -31,12 +31,12 @@ const getUtils = (config) => {
             filter: file => {
                 let isEntry = false;
                 Object.keys(rawEntries).forEach((entryName) => {
-                    if(`${config.srcPath}/${rawEntries[entryName].inputFile}.js` === file) {
+                    if(new RegExp(`${config.srcPath}(?:\\/|\\\\)${rawEntries[entryName].inputFile}.js`).test(file)) {
                         isEntry = true;
                     }
                 });
 
-                return !isEntry && file.indexOf('.ejs') < 0
+                return !isEntry && file.indexOf('.ejs') && file.indexOf('.scss') < 0
             }
         });
 

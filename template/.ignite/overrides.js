@@ -1,3 +1,7 @@
+const { realpathSync } = require('fs-extra');
+const __appDir = realpathSync(process.cwd());
+const path = require('path');
+
 const basicConfigOverrides = {
     //srcPath: 'src',
     //outputPath: 'build',
@@ -16,7 +20,6 @@ const basicConfigOverrides = {
     //autoOpenBrowser: true,
 }
 const advancedConfigOverrides = {
-    //publicUrl: '/',
     //publicPath: '/',
     //cssRelativePath: '../',
     //fileLoaderRelativePath: '../',

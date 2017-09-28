@@ -1,6 +1,6 @@
 const REACT_APP = /^REACT_APP_/i;
 
-function getClientEnvironment(publicUrl) {
+function getClientEnvironment(publicPath) {
     const raw = Object
         .keys(process.env)
         .filter(key => REACT_APP.test(key))
@@ -9,7 +9,7 @@ function getClientEnvironment(publicUrl) {
             return env;
         }, {
             'NODE_ENV': process.env.NODE_ENV || 'development',
-            'PUBLIC_URL': publicUrl
+            'PUBLIC_URL': publicPath
         });
     // Stringify all values so we can feed into Webpack DefinePlugin
     const stringified = {
