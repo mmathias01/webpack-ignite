@@ -36,7 +36,7 @@ const getUtils = (config) => {
                     }
                 });
 
-                return !isEntry && (file.indexOf('.ejs') || file.indexOf('.scss')) < 0
+                return !isEntry && !/\.(ejs|vue|scss|jsx)/.test(file)
             }
         });
 
