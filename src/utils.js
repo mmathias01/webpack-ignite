@@ -26,7 +26,7 @@ const getUtils = (config) => {
     };
 
     const copyContentFolder = () => {
-        copySync(config.contentPath, config.outputPath, {
+        copySync(config.contentPath, config.assetOutputPath || config.outputPath, {
             dereference: true,
             filter: file => {
                 let isEntry = false;

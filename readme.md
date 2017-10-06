@@ -46,7 +46,6 @@ const basicConfigOverrides = {
 }
 
 const advancedConfigOverrides = {
-    publicUrl: '/', //Deprecated. Use publicPath.
     publicPath: '/', //The public path the site will be hosted at.
     cssRelativePath: '../', //The relative path between the CSS files and the assets folder(s). 
     fileLoaderRelativePath: '../', //The relative path to the assets folder(s) for non CSS files.

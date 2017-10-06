@@ -1,6 +1,7 @@
 ﻿/* eslint no-unused-vars: off */
 const webpack = require('webpack');
 const path = require('path');
+const fs = require('fs');
 const {
     utils: {
         getUtils
@@ -154,24 +155,29 @@ const setupConfig = (config) => {
         plugins: removeEmpty([
             //Webpack HTML plugins
             ...Object.keys(entries).map((name) => {
-                return new HtmlWebpackPlugin({
-                    inject: true,
-                    chunks: [name, config.commonChunkName, config.runtimeChunkName],
-                    template: path.join(__dirname, config.templatePath, `${entries[name].inputFile}.ejs`),
-                    filename: `${entries[name].outputTemplateFile}.html`,
-                    minify: {
-                        removeComments: ifProduction(),
-                        collapseWhitespace: ifProduction() && config.minifyHTMLInProd,
-                        useShortDoctype: true,
-                        removeStyleLinkTypeAttributes: false,
-                        keepClosingSlash: true,
-                        removeEmptyAttributes: false,
-                        removeRedundantAttributes: false,
-                        minifyJS: false,
-                        minifyCSS: false,
-                        minifyURLs: false
+                let template = path.join(__dirname, config.templatePath, `${entries[name].inputFile}.ejs`);
+                fs.exists(template, function(exists) {
+                    if (exists) {
+                        return new HtmlWebpackPlugin({
+                            inject: true,
+                            chunks: [name, config.commonChunkName, config.runtimeChunkName],
+                            template,
+                            filename: `${entries[name].outputTemplateFile}.html`,
+                            minify: {
+                                removeComments: ifProduction(),
+                                collapseWhitespace: ifProduction() && config.minifyHTMLInProd,
+                                useShortDoctype: true,
+                                removeStyleLinkTypeAttributes: false,
+                                keepClosingSlash: true,
+                                removeEmptyAttributes: false,
+                                removeRedundantAttributes: false,
+                                minifyJS: false,
+                                minifyCSS: false,
+                                minifyURLs: false
+                            }
+                        })
                     }
-                })
+                });
             }),
 
             //Make sure our paths aren't case sensitive

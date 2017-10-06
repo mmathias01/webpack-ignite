@@ -86,7 +86,7 @@ const devServerConfig = {
     stats: {children: false}
 }
 
- /**
+/**
  * You really should never have to modify anything below this, like ever.
  */
 

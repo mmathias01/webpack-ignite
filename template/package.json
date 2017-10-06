@@ -18,6 +18,6 @@
     "last 2 versions"
   ],
   "devDependencies": {
-    "webpack-ignite": "0.5.2"
+    "webpack-ignite": "0.5.3"
   }
 }

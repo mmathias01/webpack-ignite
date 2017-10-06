@@ -1,6 +1,6 @@
 {
   "name": "webpack-ignite",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "description": "The fastest way to ignite your development with webpack",
   "repository": "git@github.com:mmathias01/webpack-ignite.git",
   "author": "gyro, LLC",
