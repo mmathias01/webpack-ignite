@@ -40,8 +40,8 @@ const advancedConfigOverrides = {
     // postCssOptions: {
     //     data: '@import "global";',
     //     includePaths: [
-    //         path.join(__appDir, '..', 'src/assets/scss/'),
-    //         path.join(__appDir, '..', 'node_modules/foundation-sites/scss')
+    //         path.join(__appDir, 'src/assets/scss/'),
+    //         path.join(__appDir, 'node_modules/foundation-sites/scss')
     //     ]
     // }
 }

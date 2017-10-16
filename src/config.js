@@ -15,7 +15,7 @@ let basicConfig = {
     templatePath: 'src',
     usejQuery: true,
     usePreact: false,
-    useStandaloneVue: false,
+    useStandaloneVue: true,
     useHashInProd: true,
     minifyHTMLInProd: false,
     cleanBeforeBuild: true,

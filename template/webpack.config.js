@@ -21,6 +21,22 @@ const setupConfig = (config) => {
     const CleanWebpackPlugin = require('clean-webpack-plugin');
     const WebpackOnBuildPlugin = require('on-build-webpack');
     const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+
+    const { imageminLoader, ImageminWebpackPlugin } = require( 'imagemin-webpack')
+
+    const gifSicle = require('imagemin-gifsicle');
+    const mozJpeg = require('imagemin-mozjpeg');
+    const optiPng = require('imagemin-optipng');
+    const svgO = require('imagemin-svgo');
+
+    const imageProcessingPlugins = [
+        gifSicle(),
+        mozJpeg(),
+        optiPng(),
+        svgO()
+    ];
+
+
     const {
         copyContentFolder,
         assetFileName,
@@ -77,18 +93,26 @@ const setupConfig = (config) => {
                     }
                 },
 
-                //URL Loader
+                //Images
                 {
                     exclude: config.urlLoaderExclusions,
-                    use: [{
-                        loader: 'url-loader',
-                        options: {
-                            publicPath: config.fileLoaderRelativePath,
-                            context: config.srcPath,
-                            limit: config.inlineAssetMaxSize,
-                            name: assetFileName()
+                    use: [
+                        {
+                            loader: 'url-loader',
+                            options: {
+                                publicPath: config.fileLoaderRelativePath,
+                                context: config.srcPath,
+                                limit: config.inlineAssetMaxSize,
+                                name: assetFileName()
+                            }
+                        },
+                        {
+                            loader: imageminLoader,
+                            options: {
+                                plugins: imageProcessingPlugins
+                            }
                         }
-                    }]
+                    ]
                 },
 
                 //File Loader for excluded file(s)
@@ -206,8 +230,16 @@ const setupConfig = (config) => {
             //Give webpack access to the env variables
             new webpack.DefinePlugin(config.env.stringified),
 
+            //Dev Server / HMR Stuff
             ifNotProduction(new webpack.HotModuleReplacementPlugin()),
             ifNotProduction(new webpack.NoEmitOnErrorsPlugin()),
+
+            //Image minification
+            ifProduction(new ImageminWebpackPlugin({
+                imageminOptions: {
+                    plugins: imageProcessingPlugins
+                }
+            })),
 
             //Create a bundle with all the common chunks so it can be cached separately
             new webpack.optimize.CommonsChunkPlugin({
@@ -221,6 +253,7 @@ const setupConfig = (config) => {
                 minChunks: Infinity,
             })),
 
+            //Uglify JS
             ifProduction(new webpack.optimize.UglifyJsPlugin({
                 compress: {
                     screw_ie8: true,
@@ -253,6 +286,7 @@ const setupConfig = (config) => {
                 watch: false,
             })),
 
+            //Copy Additional Assets if this is a production build
             ifProduction(new WebpackOnBuildPlugin(function () {
                 copyContentFolder();
             })),
