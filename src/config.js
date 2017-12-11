@@ -1,150 +1,215 @@
-const getClientEnvironment = require('./env');
-const path = require('path');
-const { realpathSync } = require('fs-extra');
-const __appDir = realpathSync(process.cwd());
-const overrides = require(__appDir + '/.ignite/overrides');
-const portfinder = require('portfinder');
+const {merge} = require('lodash');
 
-/**
- * Basic Config Settings
- */
-let basicConfig = {
-    srcPath: 'src',
-    outputPath: 'build',
-    contentPath: 'src',
-    templatePath: 'src',
-    usejQuery: true,
-    usePreact: false,
-    useStandaloneVue: true,
-    useHashInProd: true,
-    minifyHTMLInProd: false,
-    cleanBeforeBuild: true,
-    inlineAssetMaxSize: 20000,
-    hotOnlyDevServer: false,
-    devServerHost: "localhost",
-    devServerAllowExternalAccess: false,
-    autoOpenBrowser: true,
-}
-
-/**
- * Advanced Config - only edit if you know exactly what you are doing!
- */
-let advancedConfig = {
-    publicPath: '/',
-    cssRelativePath: '../',
-    fileLoaderRelativePath: '../',
-    urlLoaderExclusions: [
-        /\.html$/,
-        /\.(js|jsx|vue)(\?.*)?$/,
-        /\.css$/,
-        /\.scss$/,
-        /\.json$/,
-        /\.ejs$/,
-    ],
-    fileLoaderFiles: [],
-    babelFiles: [/\.(js|jsx)$/],
-    babelExcludes: [],
-    commonChunkName: 'common',
-    runtimeChunkName: 'runtime',
-    devSourceMapMode: 'eval',
-    aliases: {
-        '@': path.resolve('src'),
-    },
-    externals:{},
-    cssPreProcessingExcludes: [],
-    postCssOptions: {
-        includePaths: [
-            path.join(__appDir, '..', 'src/assets/scss/')
-        ]
-    },
-    additionalCopyOperations: [],
-    moduleString: (type, hash) => {
-        return `${type.extension}/[name]${hash ? '.[hash:8]' : ''}.${type.extension}`
-    },
-    assetString: (hash) => {
-        return `[path][name]${hash ? '.[hash:8]' : ''}.[ext]`
-    },
-    get env() {
-        return getClientEnvironment(this.publicPath)
-    },
-}
-
-/**
- * Dev Server Config
- */
-const devServerConfig = {
-    contentBase: path.join(__appDir, basicConfig.contentPath),
-    watchContentBase: true,
-    host: basicConfig.devServerHost,
-    disableHostCheck: basicConfig.devServerAllowExternalAccess,
-    open: basicConfig.autoOpenBrowser,
-    compress: false,
-    overlay: {
-        warnings: true,
-        errors: true
-    },
-    stats: {children: false}
-}
-
-/**
- * You really should never have to modify anything below this, like ever.
- */
-
-const fileTypes = {
-    JAVASCRIPT: {folder: 'js', extension: 'js'},
-    STYLESHEET: {folder: 'css', extension: 'css'},
-    IMAGE: {folder: 'img', extension: 'jpg'},
-    PDF: {folder: 'pdf', extension: 'pdf'},
-}
-
-const getConfig = () => {
-
-    return new Promise((resolve, reject) => {
-        portfinder.basePort = 3000;
-        portfinder.getPortPromise()
-            .then((port) => {
-                devServerConfig.port = port;
-                Object.assign(basicConfig, overrides.basicConfigOverrides);
-                Object.assign(advancedConfig, overrides.advancedConfigOverrides);
-                Object.assign(devServerConfig, overrides.devServerConfigOverrides);
-
-                if (basicConfig.usePreact) {
-                    const preact_aliases = {
-                        'react$': 'preact-compat',
-                        'react-dom': 'preact-compat',
-                    };
-                    advancedConfig.aliases = Object.assign(advancedConfig.aliases, preact_aliases)
+class Configuration {
+    constructor(env, localConfig) {
+        this._baseConfiguration = {
+            source: {
+                path: 'src',
+                assetsPath: 'src',
+                templatePath: 'src',
+            },
+            output: {
+                outputPath: 'build',
+                assetOutputPath: null,
+                serverPath: '/',
+                inlineAssetMaxSize: 20000,
+                clean: true,
+                addContentHash: true,
+            },
+            sourceMaps: {
+                development: 'eval',
+                production: false
+            },
+            devServer: {
+                host: 'localhost',
+                openBrowser: true,
+                allowExternal: false,
+                port: 3001,
+                hot: 'hot',
+                stats: {
+                    // fallback value for stats options when an option is not defined (has precedence over local webpack defaults)
+                    all: undefined,
+                    // Add asset Information
+                    assets: true,
+                    // Sort assets by a field
+                    // You can reverse the sort with `!field`.
+                    assetsSort: 'field',
+                    // Add information about cached (not built) modules
+                    cached: true,
+                    // Show cached assets (setting this to `false` only shows emitted files)
+                    cachedAssets: false,
+                    // Add children information
+                    children: false,
+                    // Add chunk information (setting this to `false` allows for a less verbose output)
+                    chunks: false,
+                    // Add built modules information to chunk information
+                    chunkModules: false,
+                    // Add the origins of chunks and chunk merging info
+                    chunkOrigins: false,
+                    // Sort the chunks by a field
+                    // You can reverse the sort with `!field`. Default is `id`.
+                    chunksSort: 'field',
+                    // Context directory for request shortening
+                    context: '../src/',
+                    // `webpack --colors` equivalent
+                    colors: true,
+                    // Display the distance from the entry point for each module
+                    depth: false,
+                    // Display the entry points with the corresponding bundles
+                    entrypoints: false,
+                    // Add --env information
+                    env: false,
+                    // Add errors
+                    errors: true,
+                    // Add details to errors (like resolving log)
+                    errorDetails: true,
+                    // Add the hash of the compilation
+                    hash: true,
+                    // Set the maximum number of modules to be shown
+                    maxModules: 15,
+                    // Add built modules information
+                    modules: false,
+                    // Sort the modules by a field
+                    // You can reverse the sort with `!field`. Default is `id`.
+                    modulesSort: 'field',
+                    // Show dependencies and origin of warnings/errors (since webpack 2.5.0)
+                    moduleTrace: true,
+                    // Show performance hint when file size exceeds `performance.maxAssetSize`
+                    performance: true,
+                    // Show the exports of the modules
+                    providedExports: false,
+                    // Add public path information
+                    publicPath: true,
+                    // Add information about the reasons why modules are included
+                    reasons: true,
+                    // Add the source code of modules
+                    source: true,
+                    // Add timing information
+                    timings: true,
+                    // Show which exports of a module are used
+                    usedExports: false,
+                    // Add webpack version information
+                    version: true,
+                    // Add warnings
+                    warnings: true,
                 }
+            },
+            jQuery: {
+                enablejQuery: false,
+            },
+            react: {
+                usePreact: false,
+            },
+            vue: {
+                useStandaloneLibrary: false,
+            },
+            advanced: {
+                aliases: {},
+                externals: {},
+                resolves: {},
+                babel: {
+                    files: [/\.(js|jsx)$/],
+                    exclude: [/node_modules/],
+                },
+                sass: {
+                    relativeAssetsPath: '',
+                    includes: [],
+                    excludes: [],
+                    loaderOptions: {}
+                },
+                html: {
+                    injectStylesAndScripts: true,
+                    minify: false
+                },
+                fileLoader: {
+                    relativeAssetsPath: '',
+                    fileLoaderFiles: [],
+                    moduleString:
+                        (type, hash) => {
+                            return `${type.extension}/[name]${hash ? '.[chunkhash:8]' : ''}.${type.extension}`
+                        },
+                    assetString:
+                        (hash) => {
+                            return `[path][name]${hash ? '.[hash:8]' : ''}.[ext]`
+                        },
+                },
+                urlLoader: {
+                    processImages: false,
+                    imageProcessingPlugins: [],
+                    exclude: [
+                        /\.html$/,
+                        /\.(js|jsx|vue)(\?.*)?$/,
+                        /\.css$/,
+                        /\.scss$/,
+                        /\.json$/,
+                        /\.ejs$/,
+                    ],
+                },
+                chunkNames: {
+                    manifest: 'runtime',
+                    common:
+                        'common',
+                    vendor:
+                        'vendor'
+                },
+                additionalCopyOperations: [
+                    //{ from: 'src/assets', to: 'assets'}
+                    //{ from: 'src/js/third-party', to: 'js/third-party'}
+                ],
+            },
+            runtime: {
+                env,
+                babelWorkerPool: {
+                    threads: 0,
+                    get workers() {
+                        return this.threads || 0;
+                    },
+                    poolTimeout: env.watch ? Infinity : 2000,
+                    name: 'babelPool'
+                },
+                sassWorkerPool: {
+                    threads: 0,
+                    get workers() {
+                        return this.threads || 0;
+                    },
+                    workerParallelJobs: 2,
+                    poolTimeout: env.watch ? Infinity : 2000,
+                    name: 'sassPool'
+                },
+            },
+        }
 
-                if (basicConfig.usejQuery) {
-                    const jquery_aliases = {
-                        'jquery': 'jquery/src/jquery',
-                    };
-                    advancedConfig.aliases = Object.assign(advancedConfig.aliases, jquery_aliases)
-                }
+        const _finalConfiguration = Object.assign({}, this._baseConfiguration)
+        merge(_finalConfiguration, localConfig);
 
-                if (basicConfig.useStandaloneVue) {
-                    const vue_aliases = {
-                        'vue$': 'vue/dist/vue.esm.js',
-                    }
-                    advancedConfig.aliases = Object.assign(advancedConfig.aliases, vue_aliases)
-                }
+        if (_finalConfiguration.react.usePreact) {
+            const preact_aliases = {
+                'react$': 'preact-compat',
+                'react-dom': 'preact-compat',
+            };
+            merge(_finalConfiguration.advanced.aliases, preact_aliases)
+        }
 
-                if(basicConfig.hotOnlyDevServer) {
-                    devServerConfig.hotOnly = true;
-                } else {
-                    devServerConfig.hot = true;
-                }
+        if (_finalConfiguration.jQuery.enablejQuery) {
+            const jquery_aliases = {
+                'jquery': 'jquery/src/jquery',
+            };
+            merge(_finalConfiguration.advanced.aliases, jquery_aliases)
+        }
 
-                resolve(Object.assign({}, basicConfig, advancedConfig, {devServer: devServerConfig}))
-            })
-            .catch((err) => {
-                reject(err);
-            });
-    })
+        if (_finalConfiguration.vue.useStandaloneLibrary) {
+            const vue_aliases = {
+                'vue$': 'vue/dist/vue.esm.js',
+            }
+            merge(_finalConfiguration.advanced.aliases, vue_aliases)
+        }
+
+        this._configuration = _finalConfiguration;
+    }
+
+    get configuration() {
+        return this._configuration
+    }
 }
 
-module.exports = {
-    getConfig,
-    fileTypes
-}
+exports.Configuration = Configuration;
