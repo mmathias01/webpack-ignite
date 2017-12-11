@@ -35,7 +35,7 @@ doHelp()
 const template = commander.args[0];
 const output_folder = commander.args[1]
 const templateCache = path.join(home, '.wpignite-template-cache', template.replace(/\//g, '-'))
-const spinner = ora(`Creating new project based on ${template} in ${path.resolve(__dirname, output_folder)}`).info();
+const spinner = ora(`Creating new project based on ${template} in ${path.resolve(output_folder)}`).info();
 
 const getTemplate = (template) => {
     spinner.start(`Downloading ${template} template...`)
@@ -57,7 +57,7 @@ const getTemplate = (template) => {
 }
 
 const createProject = (templateFolder) => {
-    spinner.start(`Creating new project in ${path.resolve(__dirname, output_folder)}`)
+    spinner.start(`Creating new project in ${path.resolve(output_folder)}`)
     Metalsmith(__dirname)
         .source(templateFolder)
         .destination(path.resolve(output_folder))
