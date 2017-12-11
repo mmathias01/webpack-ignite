@@ -1,0 +1,80 @@
+#!/usr/bin/env node
+
+const commander = require('commander')
+const path = require('path')
+const chalk = require('chalk')
+const download = require('download-git-repo')
+const ora = require('ora')
+const home = require('user-home')
+const exists = require('fs').existsSync
+const rm = require('rimraf').sync
+const Metalsmith  = require('metalsmith')
+
+commander.usage('<template-name> <project-name>')
+
+commander.on('--help', function () {
+    console.log()
+    console.log('   Example(s):')
+    console.log()
+    console.log(chalk.yellow('    -- ignite a new webpack project --'))
+    console.log()
+    console.log('   $ wpignite ignite template new-project')
+    console.log()
+    console.log()
+})
+
+function doHelp() {
+    commander.parse(process.argv)
+    if (commander.args.length < 2) {
+        return commander.help()
+    }
+}
+
+doHelp()
+
+const template = commander.args[0];
+const output_folder = commander.args[1]
+const templateCache = path.join(home, '.wpignite-template-cache', template.replace(/\//g, '-'))
+const spinner = ora(`Creating new project based on ${template} in ${path.resolve(__dirname, output_folder)}`).info();
+
+const getTemplate = (template) => {
+    return new Promise((resolve, reject) => {
+        spinner.start(`Downloading ${template} template...`)
+
+        if (exists(templateCache)) {
+            rm(templateCache)
+        }
+
+        download(template, templateCache, {}, (error) => {
+            spinner.succeed()
+            if (error) {
+                reject(error);
+                console.error(chalk.red('ERROR:'), `There was an error downloading ${template}: ${error.message.trim()}`)
+            }
+            resolve(templateCache);
+        })
+    });
+}
+
+const createProject = (templateFolder) => {
+    spinner.start(`Creating new project in ${path.resolve(__dirname, output_folder)}`)
+    Metalsmith(__dirname)
+        .source(templateCache)
+        .destination(path.resolve(output_folder))
+        .clean(false)
+        .build(function (error) {
+            if (error) {
+                spinner.error(error.message.trim());
+                throw error;
+            }
+            spinner.succeed();
+        })
+}
+
+const main = () => {
+    getTemplate(template)
+        .then(template => createProject(template));
+}
+
+main();
+
