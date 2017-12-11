@@ -38,19 +38,19 @@ const templateCache = path.join(home, '.wpignite-template-cache', template.repla
 const spinner = ora(`Creating new project based on ${template} in ${path.resolve(__dirname, output_folder)}`).info();
 
 const getTemplate = (template) => {
+    spinner.start(`Downloading ${template} template...`)
     return new Promise((resolve, reject) => {
-        spinner.start(`Downloading ${template} template...`)
 
         if (exists(templateCache)) {
             rm(templateCache)
         }
 
-        download(template, templateCache, {}, (error) => {
-            spinner.succeed()
+        download(`webpack-ignite-templates/${template}`, templateCache, {}, (error) => {
             if (error) {
+                spinner.stop();
                 reject(error);
-                console.error(chalk.red('ERROR:'), `There was an error downloading ${template}: ${error.message.trim()}`)
             }
+            spinner.succeed()
             resolve(templateCache);
         })
     });
@@ -59,12 +59,12 @@ const getTemplate = (template) => {
 const createProject = (templateFolder) => {
     spinner.start(`Creating new project in ${path.resolve(__dirname, output_folder)}`)
     Metalsmith(__dirname)
-        .source(templateCache)
+        .source(templateFolder)
         .destination(path.resolve(output_folder))
         .clean(false)
         .build(function (error) {
             if (error) {
-                spinner.error(error.message.trim());
+                spinner.stop();
                 throw error;
             }
             spinner.succeed();
@@ -73,7 +73,11 @@ const createProject = (templateFolder) => {
 
 const main = () => {
     getTemplate(template)
-        .then(template => createProject(template));
+        .then(template => createProject(template))
+        .catch(error=>{
+            spinner.stop();
+            console.error(chalk.red('ERROR:'), `There was an error downloading ${template}: ${error.message.trim()}`)
+        });
 }
 
 main();
