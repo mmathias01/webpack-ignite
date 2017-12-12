@@ -25,11 +25,12 @@ class Utils {
             const rawEntries = require(this.config.runtime.appDir + '/.ignite/entries');
             this._entries = Object.assign({}, rawEntries);
             Object.keys(this._entries).forEach(key => {
+                const folderPath = this._entries[key].folder ? `${this._entries[key].folder}/` : '';
                 this._entries[key].folder = this._entries[key].folder || '';
-                this._entries[key].inputFile = this._entries[key].inputFile ? `${this._entries[key].folder}/${this._entries[key].inputFile}` : key;
-                this._entries[key].templateFile = this._entries[key].templateFile ? `${this._entries[key].folder}/${this._entries[key].templateFile}` : `${this._entries[key].inputFile}`;
-                this._entries[key].outputFilename = this._entries[key].outputFilename ? `${this._entries[key].folder}/${this._entries[key].outputFilename}` : this._entries[key].inputFile;
-                this._entries[key].outputTemplateFile = this._entries[key].outputTemplateFile ? `${this._entries[key].folder}/${this._entries[key].outputTemplateFile}` : `${this._entries[key].templateFile}`;
+                this._entries[key].inputFile = this._entries[key].inputFile ? `${this._entries[key].inputFile}` : key;
+                this._entries[key].templateFile = this._entries[key].templateFile ? `${folderPath}${this._entries[key].templateFile}` : `${this._entries[key].inputFile}`;
+                this._entries[key].outputFilename = this._entries[key].outputFilename ? `${folderPath}${this._entries[key].outputFilename}` : this._entries[key].inputFile;
+                this._entries[key].outputTemplateFile = this._entries[key].outputTemplateFile ? `${folderPath}${this._entries[key].outputTemplateFile}` : `${this._entries[key].templateFile}`;
             });
         }
         return this._entries;
